@@ -28,7 +28,7 @@ const unsigned long ULTRASONIC_SERIAL_PRINT_INTERVAL_MS = 200;
 
 // ===== 栅格模式 =====
 const bool GRID_MODE_ENABLED = true;
-const int GRID_LEFT_SPEED  = 240;                 // 栅格冲刺左轮速度（0~255）
+const int GRID_LEFT_SPEED  = 230;               // 栅格冲刺左轮速度（0~255）
 const int GRID_RIGHT_SPEED = 220;                 // 栅格冲刺右轮速度（0~255）
 const unsigned long GRID_MODE_TIME_MS     = 3400;   // 栅格冲刺持续时间（ms）
 const unsigned long GRID_REENTER_BLOCK_MS = 5000;   // 退出栅格后多久才能再次进入（ms）
@@ -80,11 +80,11 @@ const int LOST_TURN_REVERSE_SPEED  = 140; // 丢线修正内侧反转速度
 const int SLOW_LOST_LEFT_INNER_SPEED = 40;  // 慢速丢线左找线内侧速度
 const int SLOW_LOST_LEFT_OUTER_SPEED = 215; // 慢速丢线左找线外侧速度
 const int GRID_EXIT_LOST_INNER_SPEED = 190;  // 栅格退出后找线内侧速度
-const int GRID_EXIT_LOST_OUTER_SPEED = 15; // 栅格退出后找线外侧速度
+const int GRID_EXIT_LOST_OUTER_SPEED =100; // 栅格退出后找线外侧速度
 
 // ===== 抓取完成后摆头找线 =====
 const unsigned long GRAB_WIGGLE_DELAY_MS      = 700; // 抓取后多久没找到线就开始摆头（ms）
-const unsigned long GRAB_WIGGLE_HALF_CYCLE_MS = 200; // 摆头固定单次时间（ms）
+const unsigned long GRAB_WIGGLE_HALF_CYCLE_MS = 500;// 摆头固定单次时间（ms）
 const int GRAB_WIGGLE_MAX_STEPS = 5;     // 保留（固定幅度模式下不再使用）
 const int GRAB_WIGGLE_INNER_SPEED = 150; // 摆头内侧速度（实际反转）
 const int GRAB_WIGGLE_OUTER_SPEED = 150; // 摆头外侧速度
