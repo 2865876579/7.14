@@ -1,0 +1,8 @@
+id: final4
+name: final4
+version: 1.0.0
+author: '111'
+icon: ''
+desc: middle-half x lower-two-thirds ROI, stable20, stricter ellipse
+files:
+  - main.py
