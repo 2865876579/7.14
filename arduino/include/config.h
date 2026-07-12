@@ -30,7 +30,7 @@ const unsigned long ULTRASONIC_SERIAL_PRINT_INTERVAL_MS = 200;
 const bool GRID_MODE_ENABLED = true;
 const int GRID_LEFT_SPEED  = 230;               // 栅格冲刺左轮速度（0~255）
 const int GRID_RIGHT_SPEED = 220;                 // 栅格冲刺右轮速度（0~255）
-const unsigned long GRID_MODE_TIME_MS     = 3400;   // 栅格冲刺持续时间（ms）
+const unsigned long GRID_MODE_TIME_MS     = 3600;  // 栅格冲刺持续时间（ms）
 const unsigned long GRID_REENTER_BLOCK_MS = 5000;   // 退出栅格后多久才能再次进入（ms）
 
 // ===== 灰度传感器阈值（低于阈值判为黑线） =====
@@ -84,12 +84,12 @@ const int GRID_EXIT_LOST_OUTER_SPEED =100; // 栅格退出后找线外侧速度
 
 // ===== 抓取完成后摆头找线 =====
 const unsigned long GRAB_WIGGLE_DELAY_MS      = 700; // 抓取后多久没找到线就开始摆头（ms）
-const unsigned long GRAB_WIGGLE_HALF_CYCLE_MS = 500;// 摆头固定单次时间（ms）
+const unsigned long GRAB_WIGGLE_HALF_CYCLE_MS = 800;//头固定单次时间（ms）
 const int GRAB_WIGGLE_MAX_STEPS = 5;     // 保留（固定幅度模式下不再使用）
 const int GRAB_WIGGLE_INNER_SPEED = 150; // 摆头内侧速度（实际反转）
 const int GRAB_WIGGLE_OUTER_SPEED = 150; // 摆头外侧速度
-const int CORNER_TURN_FORWARD_SPEED  = 220; // 直角弯外侧速度
-const int CORNER_TURN_REVERSE_SPEED  = 200; // 直角弯内侧反转速度
+const int CORNER_TURN_FORWARD_SPEED  = 230; // 直角弯外侧速度
+const int CORNER_TURN_REVERSE_SPEED  = 210;// 直角弯内侧反转速度
 const int FINAL_BACKWARD_LEFT_SPEED  = 65;  // 终点后退左轮速度
 const int FINAL_BACKWARD_RIGHT_SPEED = 130; // 终点后退右轮速度
 
@@ -133,7 +133,7 @@ const int ARM_HOLD_S3 = 235;
 // ===== 机械臂动作时序 =====
 const unsigned long ARM_STEP_INTERVAL_MS  = 1200; // 每步动作间隔（ms）
 const unsigned long ARM_GRAB_S2_DELAY_MS  = 5000; // 抓取模式 servo2 动作前等待（ms）
-const unsigned long ARM_GRAB_S3_DELAY_MS  = 10000; // 抓取模式 servo3 动作前等待（ms）
+const unsigned long ARM_GRAB_S3_DELAY_MS  = 5000; // 抓取模式 servo3 动作前等待（ms）
 const unsigned long ARM_DONE_HOLD_MS      = 1000; // 动作完成后额外等待（ms）
 
 #endif
