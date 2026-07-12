@@ -28,8 +28,7 @@ enum UltrasonicCountState : uint8_t {
 };
 
 static UltrasonicCountState ultrasonicCountState = ULTRASONIC_COUNT_ARMED;
-static uint8_t ultrasonicNearHistory = 0;
-static uint8_t ultrasonicRecentValidCount = 0;
+static uint8_t ultrasonicEnterConfirmCount = 0;
 static uint8_t ultrasonicClearConfirmCount = 0;
 static uint8_t ultrasonicNoEchoCount = 0;
 static uint8_t ultrasonicDetectionCount = 0;
@@ -72,21 +71,6 @@ static float lineStrength(int raw, int thresh) {
   return clampF((thresh + LINE_RAW_SIGNAL_MARGIN - raw) / LINE_RAW_SIGNAL_MARGIN, 0.0f, 1.0f);
 }
 
-static void resetUltrasonicNearWindow() {
-  ultrasonicNearHistory = 0;
-  ultrasonicRecentValidCount = 0;
-}
-
-static uint8_t ultrasonicNearCount() {
-  uint8_t bits = ultrasonicNearHistory;
-  uint8_t count = 0;
-  for (uint8_t i = 0; i < ULTRASONIC_NEAR_WINDOW_SAMPLES; i++) {
-    count += bits & 0x01;
-    bits >>= 1;
-  }
-  return count;
-}
-
 static bool shouldStopThisDetection() {
   int shape = getDetectedShape();
   if (shape == SHAPE_TRIANGLE && ultrasonicDetectionCount == 1) return true;
@@ -125,7 +109,6 @@ static bool stopForUltrasonicObstacle() {
       if (ultrasonicNoEchoCount >= ULTRASONIC_NO_ECHO_CLEAR_SAMPLES) {
         ultrasonicCountState = ULTRASONIC_COUNT_ARMED;
         ultrasonicNoEchoCount = 0;
-        resetUltrasonicNearWindow();
       }
       return false;
     }
@@ -138,28 +121,25 @@ static bool stopForUltrasonicObstacle() {
       if (ultrasonicClearConfirmCount >= ULTRASONIC_CLEAR_CONFIRM_SAMPLES) {
         ultrasonicCountState = ULTRASONIC_COUNT_ARMED;
         ultrasonicClearConfirmCount = 0;
-        resetUltrasonicNearWindow();
       }
     } else {
-      // 只要距离未连续超过 25cm，就保持当前障碍物锁定。
+      // 小于 12cm、仍在触发范围内或处于迟滞区时都保持锁定。
       ultrasonicClearConfirmCount = 0;
     }
     return false;
   }
 
-  if (!ultrasonicSampleValid) return false;
-
-  ultrasonicNearHistory = (uint8_t)((ultrasonicNearHistory << 1) & 0x07);
-  if (ultrasonicShouldStop()) ultrasonicNearHistory |= 0x01;
-  if (ultrasonicRecentValidCount < ULTRASONIC_NEAR_WINDOW_SAMPLES) {
-    ultrasonicRecentValidCount++;
-  }
-  if (ultrasonicRecentValidCount < ULTRASONIC_NEAR_REQUIRED_SAMPLES ||
-      ultrasonicNearCount() < ULTRASONIC_NEAR_REQUIRED_SAMPLES) {
+  if (!ultrasonicSampleValid || !ultrasonicShouldStop()) {
+    ultrasonicEnterConfirmCount = 0;
     return false;
   }
 
-  resetUltrasonicNearWindow();
+  if (ultrasonicEnterConfirmCount < ULTRASONIC_ENTER_CONFIRM_SAMPLES) {
+    ultrasonicEnterConfirmCount++;
+  }
+  if (ultrasonicEnterConfirmCount < ULTRASONIC_ENTER_CONFIRM_SAMPLES) return false;
+
+  ultrasonicEnterConfirmCount = 0;
   ultrasonicClearConfirmCount = 0;
   ultrasonicNoEchoCount = 0;
   ultrasonicCountState = ULTRASONIC_COUNT_LOCKED;
@@ -425,7 +405,7 @@ static void resetCycleState() {
   backwardClearLineTime = 0;
   gridJustExited = false;
   ultrasonicCountState = ULTRASONIC_COUNT_ARMED;
-  resetUltrasonicNearWindow();
+  ultrasonicEnterConfirmCount = 0;
   ultrasonicClearConfirmCount = 0;
   ultrasonicNoEchoCount = 0;
   ultrasonicDetectionCount = 0;

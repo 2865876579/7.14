@@ -25,11 +25,11 @@ A_MIN, A_MAX = 98, 222
 B_MIN, B_MAX = 86, 166
 
 # Geometry filter
-CANDIDATE_MIN_AREA = 40
+CANDIDATE_MIN_AREA = 80
 DEFAULT_MIN_AREA = 400
 TRIANGLE_MIN_AREA = 80
 QUADRILATERAL_MIN_AREA = 400
-ELLIPSE_MIN_AREA = 40
+ELLIPSE_MIN_AREA = 180
 MAX_AREA = FRAME_W * FRAME_H * 0.85
 MIN_W = 15
 MIN_H = 15
@@ -70,15 +70,16 @@ ELLIPSE_RECT_EXTENT_MAX = 0.84
 ELLIPSE_AXIS_RATIO_MAX = 2.00
 ELLIPSE_CIRCULARITY_MIN = 0.76
 ELLIPSE_SOLIDITY_MIN = 0.93
+ELLIPSE_MINOR_AXIS_MIN = 8.0
 ELLIPSE_FAR_AREA_MAX = 1600
-ELLIPSE_FAR_MIN_DETAIL_SIDES = 4
+ELLIPSE_FAR_MIN_DETAIL_SIDES = 5
 ELLIPSE_FAR_MIN_TIGHT_SIDES = 4
-ELLIPSE_FAR_FILL_MIN = 0.65
-ELLIPSE_FAR_FILL_MAX = 1.25
-ELLIPSE_FAR_RECT_EXTENT_MAX = 0.93
-ELLIPSE_FAR_AXIS_RATIO_MAX = 2.80
-ELLIPSE_FAR_CIRCULARITY_MIN = 0.50
-ELLIPSE_FAR_SOLIDITY_MIN = 0.72
+ELLIPSE_FAR_FILL_MIN = 0.86
+ELLIPSE_FAR_FILL_MAX = 1.18
+ELLIPSE_FAR_RECT_EXTENT_MAX = 0.85
+ELLIPSE_FAR_AXIS_RATIO_MAX = 2.20
+ELLIPSE_FAR_CIRCULARITY_MIN = 0.70
+ELLIPSE_FAR_SOLIDITY_MIN = 0.80
 
 COLOR_RED = (255, 0, 0)
 COLOR_ORANGE = (255, 165, 0)
@@ -87,7 +88,9 @@ COLOR_WHITE = (255, 255, 255)
 COLOR_BLACK = (0, 0, 0)
 
 STABLE_FRAMES_REQUIRED = 20
-ELLIPSE_STABLE_FRAMES_REQUIRED = 8
+ELLIPSE_STABLE_FRAMES_REQUIRED = 20
+STABLE_CENTER_MAX_STEP_PX = 15
+STABLE_AREA_MAX_CHANGE_RATIO = 0.45
 SEND_INTERVAL_MS = 500
 
 
@@ -228,7 +231,7 @@ def ellipse_score(contour, far_ellipse=False):
 
     major_axis = max(axis_a, axis_b)
     minor_axis = min(axis_a, axis_b)
-    if minor_axis <= 0:
+    if minor_axis < ELLIPSE_MINOR_AXIS_MIN:
         return 0
     axis_ratio_max = ELLIPSE_FAR_AXIS_RATIO_MAX if far_ellipse else ELLIPSE_AXIS_RATIO_MAX
     if major_axis / minor_axis > axis_ratio_max:
@@ -429,6 +432,8 @@ def main():
 
     last_name = "None"
     stable_frames = 0
+    last_center = None
+    last_area = 0.0
     last_send_ms = 0
 
     while not app.need_exit():
@@ -457,16 +462,35 @@ def main():
             draw_detection(out, det)
 
         if detections:
-            current_name = detections[0]["name"]
-            if current_name == last_name:
+            primary = detections[0]
+            current_name = primary["name"]
+            current_area = primary["area"]
+            current_contour = primary.get("contour", primary.get("approx"))
+            current_center = contour_center(current_contour)
+            center_close = (
+                last_center is not None
+                and (current_center[0] - last_center[0]) ** 2
+                + (current_center[1] - last_center[1]) ** 2
+                <= STABLE_CENTER_MAX_STEP_PX ** 2
+            )
+            area_close = (
+                last_area > 0
+                and abs(current_area - last_area) / max(current_area, last_area)
+                <= STABLE_AREA_MAX_CHANGE_RATIO
+            )
+            if current_name == last_name and center_close and area_close:
                 stable_frames += 1
             else:
                 last_name = current_name
                 stable_frames = 1
+            last_center = current_center
+            last_area = current_area
         else:
             current_name = "None"
             last_name = "None"
             stable_frames = 0
+            last_center = None
+            last_area = 0.0
 
         now_ms = mtime.time_ms()
         required_stable_frames = (
