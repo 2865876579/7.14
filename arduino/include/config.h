@@ -18,14 +18,15 @@ const int RIGHT_SENSOR_PIN  = A2;
 const int ULTRASONIC_TRIG_PIN = 12;
 const int ULTRASONIC_ECHO_PIN = 8;
 const bool ULTRASONIC_ENABLED = true;
-const float ULTRASONIC_STOP_MIN_CM = 12.0f;   // 触发停车的最近距离（cm）
+const float ULTRASONIC_STOP_MIN_CM = 2.0f;    // 低于此距离通常进入超声波近盲区（cm）
 const float ULTRASONIC_STOP_MAX_CM = 20.0f;   // 触发停车的最远距离（cm）
 const float ULTRASONIC_CLEAR_CM = 25.0f;      // 超过此距离才开始确认当前障碍物已离开
-const unsigned long ULTRASONIC_SAMPLE_INTERVAL_MS = 60;
+const unsigned long ULTRASONIC_SAMPLE_INTERVAL_MS = 40;
 const unsigned long ULTRASONIC_ECHO_TIMEOUT_US = 4000;
-const uint8_t ULTRASONIC_ENTER_CONFIRM_SAMPLES = 2;
+const uint8_t ULTRASONIC_NEAR_WINDOW_SAMPLES = 3;
+const uint8_t ULTRASONIC_NEAR_REQUIRED_SAMPLES = 2;
 const uint8_t ULTRASONIC_CLEAR_CONFIRM_SAMPLES = 3;
-const uint8_t ULTRASONIC_NO_ECHO_CLEAR_SAMPLES = 4;
+const uint8_t ULTRASONIC_NO_ECHO_CLEAR_SAMPLES = 12;
 const bool ULTRASONIC_SERIAL_DEBUG_ENABLED = false;
 const long ULTRASONIC_SERIAL_BAUD = 9600;
 const unsigned long ULTRASONIC_SERIAL_PRINT_INTERVAL_MS = 200;
@@ -64,17 +65,17 @@ const float LINE_SHARP_TURN_ERROR  = 62.0f; // 急转阈值
 
 // ===== 普通循迹速度（最终 PWM） =====
 const int NORMAL_FORWARD_SPEED           = 112;
-const int NORMAL_SOFT_TURN_INNER_SPEED   = 75;
-const int NORMAL_SOFT_TURN_OUTER_SPEED   = 108;
-const int NORMAL_MIDDLE_TURN_INNER_SPEED = 60;
-const int NORMAL_MIDDLE_TURN_OUTER_SPEED = 123;
+const int NORMAL_SOFT_TURN_INNER_SPEED   = 78;
+const int NORMAL_SOFT_TURN_OUTER_SPEED   = 104;
+const int NORMAL_MIDDLE_TURN_INNER_SPEED = 66;
+const int NORMAL_MIDDLE_TURN_OUTER_SPEED = 116;
 
 // ===== 慢速循迹速度（最终 PWM） =====
 const int SLOW_FORWARD_SPEED           = 105;
-const int SLOW_SOFT_TURN_INNER_SPEED   = 70;
-const int SLOW_SOFT_TURN_OUTER_SPEED   = 101;
-const int SLOW_MIDDLE_TURN_INNER_SPEED = 56;
-const int SLOW_MIDDLE_TURN_OUTER_SPEED = 115;
+const int SLOW_SOFT_TURN_INNER_SPEED   = 73;
+const int SLOW_SOFT_TURN_OUTER_SPEED   = 98;
+const int SLOW_MIDDLE_TURN_INNER_SPEED = 62;
+const int SLOW_MIDDLE_TURN_OUTER_SPEED = 109;
 
 // ===== 固定动作速度（最终 PWM） =====
 const int SHARP_TURN_FORWARD_SPEED = 210; // 急转外侧速度
