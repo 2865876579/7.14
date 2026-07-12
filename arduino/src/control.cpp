@@ -22,7 +22,15 @@ static unsigned long lastGridExitTime = 0;
 static unsigned long backwardClearLineTime = 0;
 static bool gridJustExited = false;
 
-static bool ultrasonicObstacleWasPresent = false;
+enum UltrasonicCountState : uint8_t {
+  ULTRASONIC_COUNT_ARMED,
+  ULTRASONIC_COUNT_LOCKED
+};
+
+static UltrasonicCountState ultrasonicCountState = ULTRASONIC_COUNT_ARMED;
+static uint8_t ultrasonicEnterConfirmCount = 0;
+static uint8_t ultrasonicClearConfirmCount = 0;
+static uint8_t ultrasonicNoEchoCount = 0;
 static uint8_t ultrasonicDetectionCount = 0;
 static bool ultrasonicOnceStopDone = false;
 static bool ultrasonicOnceStopActive = false;
@@ -39,7 +47,8 @@ static bool armRestoreRequested = false;
 static unsigned long grabDoneTime = 0;     // 抓取完成时刻（0=未完成）
 static bool grabWiggleRight = true;        // 当前摆头方向
 static unsigned long grabWiggleSwitchTime = 0; // 上次切换方向的时刻
-static int grabWiggleStep = 1;             // 当前摆动级数（越大摆得越远）
+static bool grabWiggleStarted = false;
+static bool grabWiggleFirstLeg = true;
 
 static unsigned long serialBlockUntilMs = 0;
 
@@ -71,8 +80,7 @@ static bool shouldStopThisDetection() {
 }
 
 static bool stopForUltrasonicObstacle() {
-  ultrasonicUpdate();
-  bool detected = ultrasonicShouldStop();
+  bool hasNewSample = ultrasonicUpdate();
 
   if (ultrasonicOnceStopActive) {
     if (millis() - ultrasonicOnceStopStart < ULTRASONIC_ONCE_STOP_MS) {
@@ -90,13 +98,51 @@ static bool stopForUltrasonicObstacle() {
     return false;
   }
 
-  if (!detected) {
-    ultrasonicObstacleWasPresent = false;
+  if (!hasNewSample) return false;
+
+  if (ultrasonicCountState == ULTRASONIC_COUNT_LOCKED) {
+    if (!ultrasonicSampleValid) {
+      ultrasonicClearConfirmCount = 0;
+      if (ultrasonicNoEchoCount < ULTRASONIC_NO_ECHO_CLEAR_SAMPLES) {
+        ultrasonicNoEchoCount++;
+      }
+      if (ultrasonicNoEchoCount >= ULTRASONIC_NO_ECHO_CLEAR_SAMPLES) {
+        ultrasonicCountState = ULTRASONIC_COUNT_ARMED;
+        ultrasonicNoEchoCount = 0;
+      }
+      return false;
+    }
+
+    ultrasonicNoEchoCount = 0;
+    if (ultrasonicDistanceCm > ULTRASONIC_CLEAR_CM) {
+      if (ultrasonicClearConfirmCount < ULTRASONIC_CLEAR_CONFIRM_SAMPLES) {
+        ultrasonicClearConfirmCount++;
+      }
+      if (ultrasonicClearConfirmCount >= ULTRASONIC_CLEAR_CONFIRM_SAMPLES) {
+        ultrasonicCountState = ULTRASONIC_COUNT_ARMED;
+        ultrasonicClearConfirmCount = 0;
+      }
+    } else {
+      // 小于 12cm、仍在触发范围内或处于迟滞区时都保持锁定。
+      ultrasonicClearConfirmCount = 0;
+    }
     return false;
   }
-  if (ultrasonicObstacleWasPresent) return false;
 
-  ultrasonicObstacleWasPresent = true;
+  if (!ultrasonicSampleValid || !ultrasonicShouldStop()) {
+    ultrasonicEnterConfirmCount = 0;
+    return false;
+  }
+
+  if (ultrasonicEnterConfirmCount < ULTRASONIC_ENTER_CONFIRM_SAMPLES) {
+    ultrasonicEnterConfirmCount++;
+  }
+  if (ultrasonicEnterConfirmCount < ULTRASONIC_ENTER_CONFIRM_SAMPLES) return false;
+
+  ultrasonicEnterConfirmCount = 0;
+  ultrasonicClearConfirmCount = 0;
+  ultrasonicNoEchoCount = 0;
+  ultrasonicCountState = ULTRASONIC_COUNT_LOCKED;
   if (ultrasonicDetectionCount < 3) ultrasonicDetectionCount++;
 
   if (!ultrasonicOnceStopDone && shouldStopThisDetection()) {
@@ -206,13 +252,24 @@ static void driveSlowLostR() {
   setMotor(-GRID_EXIT_LOST_OUTER_SPEED, GRID_EXIT_LOST_INNER_SPEED);
 }
 
-// 抓取完成后小幅左右摆头找线
-// 抓取完成后扩张式摆头找线：左右交替，每次摆得更远，直到压到线
+// 首次从中心摆到一侧，后续使用双倍时间在左右两侧之间穿过中心。
 static void driveGrabWiggle() {
   currentAction = ACTION_FORWARD_NO_LINE;
-  if (millis() - grabWiggleSwitchTime >= GRAB_WIGGLE_HALF_CYCLE_MS) {
+  unsigned long now = millis();
+  if (!grabWiggleStarted) {
+    grabWiggleStarted = true;
+    grabWiggleFirstLeg = true;
+    grabWiggleRight = true;
+    grabWiggleSwitchTime = now;
+  }
+
+  unsigned long legDuration = grabWiggleFirstLeg
+      ? GRAB_WIGGLE_HALF_CYCLE_MS
+      : GRAB_WIGGLE_HALF_CYCLE_MS * 2UL;
+  if (now - grabWiggleSwitchTime >= legDuration) {
     grabWiggleRight = !grabWiggleRight;
-    grabWiggleSwitchTime = millis();
+    grabWiggleSwitchTime = now;
+    grabWiggleFirstLeg = false;
   }
   if (grabWiggleRight) {
     setMotor(GRAB_WIGGLE_OUTER_SPEED, -GRAB_WIGGLE_INNER_SPEED);
@@ -347,7 +404,10 @@ static void resetCycleState() {
   lastGridExitTime = 0;
   backwardClearLineTime = 0;
   gridJustExited = false;
-  ultrasonicObstacleWasPresent = false;
+  ultrasonicCountState = ULTRASONIC_COUNT_ARMED;
+  ultrasonicEnterConfirmCount = 0;
+  ultrasonicClearConfirmCount = 0;
+  ultrasonicNoEchoCount = 0;
   ultrasonicDetectionCount = 0;
   ultrasonicOnceStopDone = false;
   ultrasonicOnceStopActive = false;
@@ -360,7 +420,8 @@ static void resetCycleState() {
   grabDoneTime = 0;
   grabWiggleRight = true;
   grabWiggleSwitchTime = 0;
-  grabWiggleStep = 1;
+  grabWiggleStarted = false;
+  grabWiggleFirstLeg = true;
   slowLineLostStartTime = 0;
   slowLongLossPending = false;
   clearDetectedShape();
@@ -450,7 +511,10 @@ static void handleArmPlaceFlow() {
     if (!armIsBusy() && armGetMode() == ARM_MODE_GRAB) {
       armGrabDone = true;
       grabDoneTime = millis();
-      grabWiggleSwitchTime = millis();
+      grabWiggleRight = true;
+      grabWiggleSwitchTime = 0;
+      grabWiggleStarted = false;
+      grabWiggleFirstLeg = true;
       servoSetAngle(SERVO_2, ARM_GRID_S2);
     }
     return;

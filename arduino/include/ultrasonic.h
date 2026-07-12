@@ -3,9 +3,10 @@
 
 extern float ultrasonicDistanceCm;
 extern bool  ultrasonicObjectInStopRange;
+extern bool  ultrasonicSampleValid;
 
 void ultrasonicInit();
-void ultrasonicUpdate();
+bool ultrasonicUpdate();
 bool ultrasonicShouldStop();
 
 #endif

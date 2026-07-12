@@ -20,16 +20,16 @@ FRAME_W = 320
 FRAME_H = 240
 
 # LAB threshold. Keep the upper L wide open so bright white targets are not clipped.
-L_MIN, L_MAX = 185, 255
+L_MIN, L_MAX = 203, 255
 A_MIN, A_MAX = 98, 222
 B_MIN, B_MAX = 86, 166
 
 # Geometry filter
-CANDIDATE_MIN_AREA = 80
+CANDIDATE_MIN_AREA = 40
 DEFAULT_MIN_AREA = 400
 TRIANGLE_MIN_AREA = 80
 QUADRILATERAL_MIN_AREA = 400
-ELLIPSE_MIN_AREA = 120
+ELLIPSE_MIN_AREA = 40
 MAX_AREA = FRAME_W * FRAME_H * 0.85
 MIN_W = 15
 MIN_H = 15
@@ -40,13 +40,15 @@ ROI_EDGE_MARGIN = 8
 TRIANGLE_ROI_EDGE_MARGIN = 2
 MAX_ASPECT_RATIO = 3.2
 TRIANGLE_MAX_ASPECT_RATIO = 4.0
-POLY_AREA_MIN_RATIO = 0.72
-POLY_AREA_MAX_RATIO = 1.18
-TRI_AREA_MIN_RATIO = 0.40
-TRI_AREA_MAX_RATIO = 1.50
-TRIANGLE_MIN_SOLIDITY = 0.68
-TRIANGLE_RECT_EXTENT_MAX = 0.76
-POLYGON_MIN_SOLIDITY = 0.82
+POLY_AREA_MIN_RATIO = 0.78
+POLY_AREA_MAX_RATIO = 1.10
+QUAD_EVIDENCE_AREA_RATIO_MIN = 0.78
+QUAD_EVIDENCE_AREA_RATIO_MAX = 1.15
+TRI_AREA_MIN_RATIO = 0.72
+TRI_AREA_MAX_RATIO = 1.12
+TRIANGLE_MIN_SOLIDITY = 0.72
+TRIANGLE_RECT_EXTENT_MAX = 0.72
+POLYGON_MIN_SOLIDITY = 0.88
 
 # Detect only inside the center half width and almost the full height.
 ROI_LEFT_RATIO = 0.25
@@ -61,13 +63,22 @@ APPROX_EPS = 0.035
 APPROX_EPS_STRONG = 0.055
 
 # Stricter ellipse checks to reduce false positives.
-ELLIPSE_MIN_DETAIL_SIDES = 5
-ELLIPSE_FILL_MIN = 0.78
-ELLIPSE_FILL_MAX = 1.12
+ELLIPSE_MIN_DETAIL_SIDES = 6
+ELLIPSE_FILL_MIN = 0.82
+ELLIPSE_FILL_MAX = 1.08
 ELLIPSE_RECT_EXTENT_MAX = 0.84
-ELLIPSE_AXIS_RATIO_MAX = 2.20
-ELLIPSE_CIRCULARITY_MIN = 0.72
-ELLIPSE_SOLIDITY_MIN = 0.90
+ELLIPSE_AXIS_RATIO_MAX = 2.00
+ELLIPSE_CIRCULARITY_MIN = 0.76
+ELLIPSE_SOLIDITY_MIN = 0.93
+ELLIPSE_FAR_AREA_MAX = 1600
+ELLIPSE_FAR_MIN_DETAIL_SIDES = 4
+ELLIPSE_FAR_MIN_TIGHT_SIDES = 4
+ELLIPSE_FAR_FILL_MIN = 0.65
+ELLIPSE_FAR_FILL_MAX = 1.25
+ELLIPSE_FAR_RECT_EXTENT_MAX = 0.93
+ELLIPSE_FAR_AXIS_RATIO_MAX = 2.80
+ELLIPSE_FAR_CIRCULARITY_MIN = 0.50
+ELLIPSE_FAR_SOLIDITY_MIN = 0.72
 
 COLOR_RED = (255, 0, 0)
 COLOR_ORANGE = (255, 165, 0)
@@ -76,6 +87,7 @@ COLOR_WHITE = (255, 255, 255)
 COLOR_BLACK = (0, 0, 0)
 
 STABLE_FRAMES_REQUIRED = 20
+ELLIPSE_STABLE_FRAMES_REQUIRED = 8
 SEND_INTERVAL_MS = 500
 
 
@@ -204,7 +216,7 @@ def best_polygon_approx(contour):
     return best, best_sides
 
 
-def ellipse_score(contour):
+def ellipse_score(contour, far_ellipse=False):
     if len(contour) < 5:
         return 0
 
@@ -218,21 +230,27 @@ def ellipse_score(contour):
     minor_axis = min(axis_a, axis_b)
     if minor_axis <= 0:
         return 0
-    if major_axis / minor_axis > ELLIPSE_AXIS_RATIO_MAX:
+    axis_ratio_max = ELLIPSE_FAR_AXIS_RATIO_MAX if far_ellipse else ELLIPSE_AXIS_RATIO_MAX
+    if major_axis / minor_axis > axis_ratio_max:
         return 0
 
     ellipse_area = np.pi * (axis_a * 0.5) * (axis_b * 0.5)
     if ellipse_area <= 0:
         return 0
     fill_ratio = area / ellipse_area
-    if fill_ratio < ELLIPSE_FILL_MIN or fill_ratio > ELLIPSE_FILL_MAX:
+    fill_min = ELLIPSE_FAR_FILL_MIN if far_ellipse else ELLIPSE_FILL_MIN
+    fill_max = ELLIPSE_FAR_FILL_MAX if far_ellipse else ELLIPSE_FILL_MAX
+    if fill_ratio < fill_min or fill_ratio > fill_max:
         return 0
 
     peri = cv2.arcLength(contour, True)
     if peri <= 0:
         return 0
     circularity = 4.0 * np.pi * area / (peri * peri)
-    if circularity < ELLIPSE_CIRCULARITY_MIN:
+    circularity_min = (
+        ELLIPSE_FAR_CIRCULARITY_MIN if far_ellipse else ELLIPSE_CIRCULARITY_MIN
+    )
+    if circularity < circularity_min:
         return 0
 
     rect = cv2.minAreaRect(contour)
@@ -241,7 +259,10 @@ def ellipse_score(contour):
     if rect_area <= 0:
         return 0
     rect_extent = area / rect_area
-    if rect_extent > ELLIPSE_RECT_EXTENT_MAX:
+    rect_extent_max = (
+        ELLIPSE_FAR_RECT_EXTENT_MAX if far_ellipse else ELLIPSE_RECT_EXTENT_MAX
+    )
+    if rect_extent > rect_extent_max:
         return 0
 
     return fill_ratio * circularity
@@ -263,10 +284,51 @@ def classify_shape(contour):
 
     approx_detail, _ = approx_hull(contour, APPROX_EPS_DETAIL)
     detail_sides = len(approx_detail)
-    ellipse_fit_score = ellipse_score(hull)
+    approx_tight, _ = approx_hull(contour, 0.025)
+    tight_sides = len(approx_tight)
+    approx, sides = best_polygon_approx(contour)
+    poly_area = cv2.contourArea(approx) if approx is not None else 0
+    poly_ratio = poly_area / area if area > 0 else 0
+
+    # A real quadrilateral keeps four corners under tight approximation and its
+    # fitted polygon covers nearly all contour area. Resolve it before the
+    # relaxed far-ellipse branch so rounded/noisy rectangle edges cannot be
+    # accepted as an ellipse.
+    quadrilateral_evidence = (
+        sides == 4
+        and tight_sides == 4
+        and poly_ratio >= QUAD_EVIDENCE_AREA_RATIO_MIN
+        and poly_ratio <= QUAD_EVIDENCE_AREA_RATIO_MAX
+    )
+    if quadrilateral_evidence:
+        if area < QUADRILATERAL_MIN_AREA:
+            return None
+        if solidity < POLYGON_MIN_SOLIDITY:
+            return None
+        if not contour_passes_geometry(contour, area):
+            return None
+        if poly_ratio < POLY_AREA_MIN_RATIO or poly_ratio > POLY_AREA_MAX_RATIO:
+            return None
+        return {
+            "name": "Quadrilateral",
+            "side_text": "4 sides",
+            "color": COLOR_RED,
+            "draw": "poly",
+            "approx": approx,
+            "area": area,
+        }
+
+    far_ellipse = area < ELLIPSE_FAR_AREA_MAX
+    min_detail_sides = (
+        ELLIPSE_FAR_MIN_DETAIL_SIDES if far_ellipse else ELLIPSE_MIN_DETAIL_SIDES
+    )
+    min_tight_sides = ELLIPSE_FAR_MIN_TIGHT_SIDES if far_ellipse else 5
+    solidity_min = ELLIPSE_FAR_SOLIDITY_MIN if far_ellipse else ELLIPSE_SOLIDITY_MIN
+    ellipse_fit_score = ellipse_score(hull, far_ellipse)
     ellipse_like = (
-        detail_sides >= ELLIPSE_MIN_DETAIL_SIDES
-        and solidity >= ELLIPSE_SOLIDITY_MIN
+        detail_sides >= min_detail_sides
+        and tight_sides >= min_tight_sides
+        and solidity >= solidity_min
         and ellipse_fit_score > 0
     )
     if (
@@ -291,8 +353,9 @@ def classify_shape(contour):
     if ellipse_like:
         return None
 
-    approx, sides = best_polygon_approx(contour)
     if sides == 3:
+        if tight_sides != 3:
+            return None
         if area < TRIANGLE_MIN_AREA:
             return None
         if solidity < TRIANGLE_MIN_SOLIDITY:
@@ -318,26 +381,6 @@ def classify_shape(contour):
             "name": "Triangle",
             "side_text": "3 sides",
             "color": COLOR_ORANGE,
-            "draw": "poly",
-            "approx": approx,
-            "area": area,
-        }
-
-    if sides == 4:
-        if area < QUADRILATERAL_MIN_AREA:
-            return None
-        if solidity < POLYGON_MIN_SOLIDITY:
-            return None
-        if not contour_passes_geometry(contour, area):
-            return None
-        poly_area = cv2.contourArea(approx) if approx is not None else 0
-        ratio = poly_area / area if area > 0 else 0
-        if ratio < POLY_AREA_MIN_RATIO or ratio > POLY_AREA_MAX_RATIO:
-            return None
-        return {
-            "name": "Quadrilateral",
-            "side_text": "4 sides",
-            "color": COLOR_RED,
             "draw": "poly",
             "approx": approx,
             "area": area,
@@ -426,8 +469,13 @@ def main():
             stable_frames = 0
 
         now_ms = mtime.time_ms()
+        required_stable_frames = (
+            ELLIPSE_STABLE_FRAMES_REQUIRED
+            if current_name == "Ellipse"
+            else STABLE_FRAMES_REQUIRED
+        )
         if (
-            stable_frames >= STABLE_FRAMES_REQUIRED
+            stable_frames >= required_stable_frames
             and current_name != "None"
             and now_ms - last_send_ms >= SEND_INTERVAL_MS
         ):

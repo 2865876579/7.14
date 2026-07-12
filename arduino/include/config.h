@@ -20,16 +20,20 @@ const int ULTRASONIC_ECHO_PIN = 8;
 const bool ULTRASONIC_ENABLED = true;
 const float ULTRASONIC_STOP_MIN_CM = 12.0f;   // 触发停车的最近距离（cm）
 const float ULTRASONIC_STOP_MAX_CM = 20.0f;   // 触发停车的最远距离（cm）
+const float ULTRASONIC_CLEAR_CM = 25.0f;      // 超过此距离才开始确认当前障碍物已离开
 const unsigned long ULTRASONIC_SAMPLE_INTERVAL_MS = 60;
 const unsigned long ULTRASONIC_ECHO_TIMEOUT_US = 4000;
+const uint8_t ULTRASONIC_ENTER_CONFIRM_SAMPLES = 2;
+const uint8_t ULTRASONIC_CLEAR_CONFIRM_SAMPLES = 3;
+const uint8_t ULTRASONIC_NO_ECHO_CLEAR_SAMPLES = 4;
 const bool ULTRASONIC_SERIAL_DEBUG_ENABLED = false;
 const long ULTRASONIC_SERIAL_BAUD = 9600;
 const unsigned long ULTRASONIC_SERIAL_PRINT_INTERVAL_MS = 200;
 
 // ===== 栅格模式 =====
 const bool GRID_MODE_ENABLED = true;
-const int GRID_LEFT_SPEED  = 230;               // 栅格冲刺左轮速度（0~255）
-const int GRID_RIGHT_SPEED = 220;                 // 栅格冲刺右轮速度（0~255）
+const int GRID_LEFT_SPEED  = 240;               // 栅格冲刺左轮速度（0~255）
+const int GRID_RIGHT_SPEED = 250;                 // 栅格冲刺右轮速度（0~255）
 const unsigned long GRID_MODE_TIME_MS     = 3600;  // 栅格冲刺持续时间（ms）
 const unsigned long GRID_REENTER_BLOCK_MS = 5000;   // 退出栅格后多久才能再次进入（ms）
 
@@ -77,8 +81,8 @@ const int SHARP_TURN_FORWARD_SPEED = 210; // 急转外侧速度
 const int SHARP_TURN_REVERSE_SPEED = 160; // 急转内侧反转速度
 const int LOST_TURN_FORWARD_SPEED  = 210; // 丢线修正外侧速度
 const int LOST_TURN_REVERSE_SPEED  = 140; // 丢线修正内侧反转速度
-const int SLOW_LOST_LEFT_INNER_SPEED = 40;  // 慢速丢线左找线内侧速度
-const int SLOW_LOST_LEFT_OUTER_SPEED = 215; // 慢速丢线左找线外侧速度
+const int SLOW_LOST_LEFT_INNER_SPEED = 20;  // 慢速丢线左找线内侧速度
+const int SLOW_LOST_LEFT_OUTER_SPEED = 195; // 慢速丢线左找线外侧速度
 const int GRID_EXIT_LOST_INNER_SPEED = 190;  // 栅格退出后找线内侧速度
 const int GRID_EXIT_LOST_OUTER_SPEED =100; // 栅格退出后找线外侧速度
 
@@ -86,12 +90,12 @@ const int GRID_EXIT_LOST_OUTER_SPEED =100; // 栅格退出后找线外侧速度
 const unsigned long GRAB_WIGGLE_DELAY_MS      = 700; // 抓取后多久没找到线就开始摆头（ms）
 const unsigned long GRAB_WIGGLE_HALF_CYCLE_MS = 800;//头固定单次时间（ms）
 const int GRAB_WIGGLE_MAX_STEPS = 5;     // 保留（固定幅度模式下不再使用）
-const int GRAB_WIGGLE_INNER_SPEED = 150; // 摆头内侧速度（实际反转）
-const int GRAB_WIGGLE_OUTER_SPEED = 150; // 摆头外侧速度
-const int CORNER_TURN_FORWARD_SPEED  = 230; // 直角弯外侧速度
-const int CORNER_TURN_REVERSE_SPEED  = 210;// 直角弯内侧反转速度
-const int FINAL_BACKWARD_LEFT_SPEED  = 65;  // 终点后退左轮速度
-const int FINAL_BACKWARD_RIGHT_SPEED = 130; // 终点后退右轮速度
+const int GRAB_WIGGLE_INNER_SPEED = 170; // 摆头内侧速度（实际反转）
+const int GRAB_WIGGLE_OUTER_SPEED = 170; // 摆头外侧速度
+const int CORNER_TURN_FORWARD_SPEED  = 230; // 直角弯外2速度
+const int CORNER_TURN_REVERSE_SPEED  = 220;// 直角弯内侧反转速度
+const int FINAL_BACKWARD_LEFT_SPEED  = 105; // 终点后退左轮速度
+const int FINAL_BACKWARD_RIGHT_SPEED = 125; // 终点后退右轮速度
 
 const int TURN_OUTER_SPEED = SHARP_TURN_FORWARD_SPEED;
 const int TURN_INNER_SPEED = -SHARP_TURN_REVERSE_SPEED;

@@ -4,6 +4,7 @@
 
 float ultrasonicDistanceCm      = 0.0f;
 bool  ultrasonicObjectInStopRange = false;
+bool  ultrasonicSampleValid = false;
 
 static unsigned long lastSampleTime = 0;
 static unsigned long lastPrintTime  = 0;
@@ -15,6 +16,8 @@ static void debugPrint() {
   lastPrintTime = now;
   Serial.print("ultrasonic_cm=");
   Serial.print(ultrasonicDistanceCm, 1);
+  Serial.print(", valid=");
+  Serial.print(ultrasonicSampleValid ? 1 : 0);
   Serial.print(", stop_range=");
   Serial.println(ultrasonicObjectInStopRange ? 1 : 0);
 }
@@ -26,17 +29,18 @@ void ultrasonicInit() {
   digitalWrite(ULTRASONIC_TRIG_PIN, LOW);
 }
 
-void ultrasonicUpdate() {
+bool ultrasonicUpdate() {
   if (!ULTRASONIC_ENABLED) {
     ultrasonicDistanceCm      = 0.0f;
     ultrasonicObjectInStopRange = false;
+    ultrasonicSampleValid = false;
     debugPrint();
-    return;
+    return false;
   }
   unsigned long now = millis();
   if (now - lastSampleTime < ULTRASONIC_SAMPLE_INTERVAL_MS) {
     debugPrint();
-    return;
+    return false;
   }
   lastSampleTime = now;
 
@@ -50,14 +54,17 @@ void ultrasonicUpdate() {
   if (echo == 0) {
     ultrasonicDistanceCm      = 0.0f;
     ultrasonicObjectInStopRange = false;
+    ultrasonicSampleValid = false;
     debugPrint();
-    return;
+    return true;
   }
+  ultrasonicSampleValid = true;
   ultrasonicDistanceCm = echo / 58.0f;
   ultrasonicObjectInStopRange =
       ultrasonicDistanceCm >= ULTRASONIC_STOP_MIN_CM &&
       ultrasonicDistanceCm <= ULTRASONIC_STOP_MAX_CM;
   debugPrint();
+  return true;
 }
 
 bool ultrasonicShouldStop() {
