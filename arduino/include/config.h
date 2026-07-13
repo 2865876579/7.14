@@ -32,9 +32,9 @@ const unsigned long ULTRASONIC_SERIAL_PRINT_INTERVAL_MS = 200;
 
 // ===== 栅格模式 =====
 const bool GRID_MODE_ENABLED = true;
-const int GRID_LEFT_SPEED  = 215;               // 栅格冲刺左轮速度（0~255）
-const int GRID_RIGHT_SPEED = 220;                 // 栅格冲刺右轮速度（0~255）
-const unsigned long GRID_MODE_TIME_MS     = 3400;  // 栅格冲刺持续时间（ms）
+const int GRID_LEFT_SPEED  = 210;               // 栅格冲刺左轮速度（0~255）
+const int GRID_RIGHT_SPEED = 215;                 // 栅格冲刺右轮速度（0~255）
+const unsigned long GRID_MODE_TIME_MS     = 3600;  // 栅格冲刺持续时间（ms）
 const unsigned long GRID_REENTER_BLOCK_MS = 5000;   // 退出栅格后多久才能再次进入（ms）
 
 // ===== 灰度传感器阈值（低于阈值判为黑线） =====
@@ -87,7 +87,7 @@ const int SHARP_TURN_FORWARD_SPEED = 210; // 急转外侧速度
 const int SHARP_TURN_REVERSE_SPEED = 160; // 急转内侧反转速度
 const int LOST_TURN_FORWARD_SPEED  = 168; // 普通丢线修正外侧速度
 const int LOST_TURN_REVERSE_SPEED  = 112; // 普通丢线修正内侧反转速度
-const int SLOW_LOST_LEFT_INNER_SPEED = 15;  // 慢速丢线左找线内侧速度
+const int SLOW_LOST_LEFT_INNER_SPEED = 25;  // 慢速丢线左找线内侧速度
 const int SLOW_LOST_LEFT_OUTER_SPEED = 195; // 慢速丢线左找线外侧速度
 const int GRID_EXIT_LOST_INNER_SPEED = 190;  // 栅格退出后找线内侧速度
 const int GRID_EXIT_LOST_OUTER_SPEED =100; // 栅格退出后找线外侧速度
@@ -99,7 +99,7 @@ const int GRAB_WIGGLE_MAX_STEPS = 5;     // 保留（固定幅度模式下不再
 const int GRAB_WIGGLE_INNER_SPEED = 170; // 摆头内侧速度（实际反转）
 const int GRAB_WIGGLE_OUTER_SPEED = 170; // 摆头外侧速度
 const int CORNER_TURN_FORWARD_SPEED  = 240; // 直角弯外2速度
-const int CORNER_TURN_REVERSE_SPEED  = 230;// 直角弯内侧反转速度
+const int CORNER_TURN_REVERSE_SPEED  = 240;// 直角弯内侧反转速度
 const int FINAL_BACKWARD_LEFT_SPEED  = 105; // 终点后退左轮速度
 const int FINAL_BACKWARD_RIGHT_SPEED = 125; // 终点后退右轮速度
 
@@ -109,7 +109,7 @@ const int TURN_INNER_SPEED = -SHARP_TURN_REVERSE_SPEED;
 // ===== 流程时间参数 =====
 const unsigned long CYCLE_STARTUP_HOLD_MS      = 800;  // 启动后等待时间（ms）
 const unsigned long BACKWARD_CLEAR_DURATION_MS = 500;  // 倒车清线时间（ms，未使用）
-const unsigned long BACKWARD_STOP_DELAY_MS     = 5000; // 终点倒车持续时间（ms）
+const unsigned long BACKWARD_STOP_DELAY_MS     = 3700; // 终点倒车持续时间（ms）
 const unsigned long SLOW_BACKWARD_MIN_LINE_LOSS_MS = 300; // 慢速模式：丢线需超过此时长，全黑才触发倒车，否则走直角弯
 const int CONTROL_DELAY_MS = 10; // 主循环间隔（ms）
 
@@ -143,7 +143,7 @@ const int ARM_HOLD_S3 = 235;
 // ===== 机械臂动作时序 =====
 const unsigned long ARM_STEP_INTERVAL_MS  = 1200; // 每步动作间隔（ms）
 const unsigned long ARM_GRAB_S2_DELAY_MS  = 5000; // 抓取模式 servo2 动作前等待（ms）
-const unsigned long ARM_GRAB_S3_DELAY_MS  = 5000; // 抓取模式 servo3 动作前等待（ms）
-const unsigned long ARM_DONE_HOLD_MS      = 1000; // 动作完成后额外等待（ms）
+const unsigned long ARM_GRAB_S3_DELAY_MS  = 1000; // 抓取模式 servo3 动作前等待（ms）
+const unsigned long ARM_DONE_HOLD_MS      = 500; // 动作完成后额外等待（ms）
 
 #endif
