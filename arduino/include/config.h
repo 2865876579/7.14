@@ -62,13 +62,13 @@ const float LINE_MIDDLE_TURN_ERROR = 38.0f; // 明显偏线阈值
 const float LINE_SHARP_TURN_ERROR  = 62.0f; // 急转阈值
 
 // ===== 普通循迹速度（最终 PWM） =====
-const int NORMAL_FORWARD_SPEED             = 90;
-const int NORMAL_SOFT_TURN_INNER_SPEED     = 62;
-const int NORMAL_SOFT_TURN_OUTER_SPEED     = 83;
-const int NORMAL_MIDDLE_TURN_INNER_SPEED   = 53;
-const int NORMAL_MIDDLE_TURN_OUTER_SPEED   = 93;
-const int NORMAL_SHARP_TURN_FORWARD_SPEED  = 168;
-const int NORMAL_SHARP_TURN_REVERSE_SPEED  = 128;
+const int NORMAL_FORWARD_SPEED             = 101;
+const int NORMAL_SOFT_TURN_INNER_SPEED     = 70;
+const int NORMAL_SOFT_TURN_OUTER_SPEED     = 94;
+const int NORMAL_MIDDLE_TURN_INNER_SPEED   = 59;
+const int NORMAL_MIDDLE_TURN_OUTER_SPEED   = 104;
+const int NORMAL_SHARP_TURN_FORWARD_SPEED  = 189;
+const int NORMAL_SHARP_TURN_REVERSE_SPEED  = 144;
 
 // ===== 慢速循迹速度（最终 PWM） =====
 const int SLOW_FORWARD_SPEED           = 105;
@@ -85,8 +85,8 @@ const unsigned long SLOW_RIGHT_RECOVERY_TIMEOUT_MS = 300;
 // ===== 固定动作速度（最终 PWM） =====
 const int SHARP_TURN_FORWARD_SPEED = 210; // 急转外侧速度
 const int SHARP_TURN_REVERSE_SPEED = 160; // 急转内侧反转速度
-const int LOST_TURN_FORWARD_SPEED  = 168; // 普通丢线修正外侧速度
-const int LOST_TURN_REVERSE_SPEED  = 112; // 普通丢线修正内侧反转速度
+const int LOST_TURN_FORWARD_SPEED  = 189; // 普通丢线修正外侧速度
+const int LOST_TURN_REVERSE_SPEED  = 126; // 普通丢线修正内侧反转速度
 const int SLOW_LOST_LEFT_INNER_SPEED = 25;  // 慢速丢线左找线内侧速度
 const int SLOW_LOST_LEFT_OUTER_SPEED = 195; // 慢速丢线左找线外侧速度
 const int GRID_EXIT_LOST_INNER_SPEED = 190;  // 栅格退出后找线内侧速度
@@ -109,7 +109,7 @@ const int TURN_INNER_SPEED = -SHARP_TURN_REVERSE_SPEED;
 // ===== 流程时间参数 =====
 const unsigned long CYCLE_STARTUP_HOLD_MS      = 800;  // 启动后等待时间（ms）
 const unsigned long BACKWARD_CLEAR_DURATION_MS = 500;  // 倒车清线时间（ms，未使用）
-const unsigned long BACKWARD_STOP_DELAY_MS     = 3700; // 终点倒车持续时间（ms）
+const unsigned long BACKWARD_STOP_DELAY_MS     = 3600; // 终点倒车持续时间（ms）
 const unsigned long SLOW_BACKWARD_MIN_LINE_LOSS_MS = 300; // 慢速模式：丢线需超过此时长，全黑才触发倒车，否则走直角弯
 const int CONTROL_DELAY_MS = 10; // 主循环间隔（ms）
 
@@ -141,7 +141,7 @@ const int ARM_HOLD_S2 = 120;
 const int ARM_HOLD_S3 = 235;
 
 // ===== 机械臂动作时序 =====
-const unsigned long ARM_STEP_INTERVAL_MS  = 1200; // 每步动作间隔（ms）
+const unsigned long ARM_STEP_INTERVAL_MS  = 500; // 每步动作间隔（ms）
 const unsigned long ARM_GRAB_S2_DELAY_MS  = 5000; // 抓取模式 servo2 动作前等待（ms）
 const unsigned long ARM_GRAB_S3_DELAY_MS  = 1000; // 抓取模式 servo3 动作前等待（ms）
 const unsigned long ARM_DONE_HOLD_MS      = 500; // 动作完成后额外等待（ms）
