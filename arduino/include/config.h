@@ -71,13 +71,13 @@ const int NORMAL_SHARP_TURN_FORWARD_SPEED  = 168;
 const int NORMAL_SHARP_TURN_REVERSE_SPEED  = 128;
 
 // ===== 慢速循迹速度（最终 PWM） =====
-const int SLOW_FORWARD_SPEED             = 84;
-const int SLOW_SOFT_TURN_INNER_SPEED     = 58;
-const int SLOW_SOFT_TURN_OUTER_SPEED     = 78;
-const int SLOW_MIDDLE_TURN_INNER_SPEED   = 50;
-const int SLOW_MIDDLE_TURN_OUTER_SPEED   = 87;
-const int SLOW_SHARP_TURN_FORWARD_SPEED  = 168;
-const int SLOW_SHARP_TURN_REVERSE_SPEED  = 128;
+const int SLOW_FORWARD_SPEED             = 95;
+const int SLOW_SOFT_TURN_INNER_SPEED     = 66;
+const int SLOW_SOFT_TURN_OUTER_SPEED     = 88;
+const int SLOW_MIDDLE_TURN_INNER_SPEED   = 56;
+const int SLOW_MIDDLE_TURN_OUTER_SPEED   = 98;
+const int SLOW_SHARP_TURN_FORWARD_SPEED  = 189;
+const int SLOW_SHARP_TURN_REVERSE_SPEED  = 144;
 
 // ===== 固定动作速度（最终 PWM） =====
 const int SHARP_TURN_FORWARD_SPEED = 210; // 急转外侧速度
