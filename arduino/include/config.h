@@ -54,7 +54,6 @@ const unsigned long MOTOR_REVERSE_KICK_MS = 0;
 const float LINE_ERROR_MAX              = 100.0f;
 const float LINE_RAW_SIGNAL_MARGIN      = 100.0f;
 const float LINE_CENTER_STRENGTH_WEIGHT = 1.00f;
-const int   EARLY_SHARP_TURN_MARGIN     = 25;
 const float LINE_ERROR_BIAS             = -20.0f; // 误差零点偏置：负值让车整体偏右循迹（左中传感器压线）
 
 // ===== 转向误差阈值 =====
@@ -63,24 +62,28 @@ const float LINE_MIDDLE_TURN_ERROR = 38.0f; // 明显偏线阈值
 const float LINE_SHARP_TURN_ERROR  = 62.0f; // 急转阈值
 
 // ===== 普通循迹速度（最终 PWM） =====
-const int NORMAL_FORWARD_SPEED           = 112;
-const int NORMAL_SOFT_TURN_INNER_SPEED   = 78;
-const int NORMAL_SOFT_TURN_OUTER_SPEED   = 104;
-const int NORMAL_MIDDLE_TURN_INNER_SPEED = 66;
-const int NORMAL_MIDDLE_TURN_OUTER_SPEED = 116;
+const int NORMAL_FORWARD_SPEED             = 90;
+const int NORMAL_SOFT_TURN_INNER_SPEED     = 62;
+const int NORMAL_SOFT_TURN_OUTER_SPEED     = 83;
+const int NORMAL_MIDDLE_TURN_INNER_SPEED   = 53;
+const int NORMAL_MIDDLE_TURN_OUTER_SPEED   = 93;
+const int NORMAL_SHARP_TURN_FORWARD_SPEED  = 168;
+const int NORMAL_SHARP_TURN_REVERSE_SPEED  = 128;
 
 // ===== 慢速循迹速度（最终 PWM） =====
-const int SLOW_FORWARD_SPEED           = 105;
-const int SLOW_SOFT_TURN_INNER_SPEED   = 73;
-const int SLOW_SOFT_TURN_OUTER_SPEED   = 98;
-const int SLOW_MIDDLE_TURN_INNER_SPEED = 62;
-const int SLOW_MIDDLE_TURN_OUTER_SPEED = 109;
+const int SLOW_FORWARD_SPEED             = 84;
+const int SLOW_SOFT_TURN_INNER_SPEED     = 58;
+const int SLOW_SOFT_TURN_OUTER_SPEED     = 78;
+const int SLOW_MIDDLE_TURN_INNER_SPEED   = 50;
+const int SLOW_MIDDLE_TURN_OUTER_SPEED   = 87;
+const int SLOW_SHARP_TURN_FORWARD_SPEED  = 168;
+const int SLOW_SHARP_TURN_REVERSE_SPEED  = 128;
 
 // ===== 固定动作速度（最终 PWM） =====
 const int SHARP_TURN_FORWARD_SPEED = 210; // 急转外侧速度
 const int SHARP_TURN_REVERSE_SPEED = 160; // 急转内侧反转速度
-const int LOST_TURN_FORWARD_SPEED  = 210; // 丢线修正外侧速度
-const int LOST_TURN_REVERSE_SPEED  = 140; // 丢线修正内侧反转速度
+const int LOST_TURN_FORWARD_SPEED  = 168; // 普通丢线修正外侧速度
+const int LOST_TURN_REVERSE_SPEED  = 112; // 普通丢线修正内侧反转速度
 const int SLOW_LOST_LEFT_INNER_SPEED = 20;  // 慢速丢线左找线内侧速度
 const int SLOW_LOST_LEFT_OUTER_SPEED = 195; // 慢速丢线左找线外侧速度
 const int GRID_EXIT_LOST_INNER_SPEED = 190;  // 栅格退出后找线内侧速度

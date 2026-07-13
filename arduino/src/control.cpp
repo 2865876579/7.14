@@ -169,14 +169,6 @@ float calculateLineError() {
   return ((-ls + rs) / total * LINE_ERROR_MAX) + bias;
 }
 
-static bool isEarlySharpLeft() {
-  return middleBlack == 1 && leftRaw < LEFT_THRESHOLD + EARLY_SHARP_TURN_MARGIN;
-}
-
-static bool isEarlySharpRight() {
-  return middleBlack == 1 && rightRaw < RIGHT_THRESHOLD + EARLY_SHARP_TURN_MARGIN;
-}
-
 static void driveStraight() {
   currentAction = ACTION_FORWARD;
   int speed = currentMode == MODE_SLOW ? SLOW_FORWARD_SPEED : NORMAL_FORWARD_SPEED;
@@ -281,13 +273,21 @@ static void driveGrabWiggle() {
 static void driveSharpL() {
   currentAction = ACTION_TURN_LEFT;
   lastTurnAction = ACTION_TURN_LEFT;
-  setMotor(-SHARP_TURN_REVERSE_SPEED, SHARP_TURN_FORWARD_SPEED);
+  if (currentMode == MODE_SLOW) {
+    setMotor(-SLOW_SHARP_TURN_REVERSE_SPEED, SLOW_SHARP_TURN_FORWARD_SPEED);
+  } else {
+    setMotor(-NORMAL_SHARP_TURN_REVERSE_SPEED, NORMAL_SHARP_TURN_FORWARD_SPEED);
+  }
 }
 
 static void driveSharpR() {
   currentAction = ACTION_TURN_RIGHT;
   lastTurnAction = ACTION_TURN_RIGHT;
-  setMotor(SHARP_TURN_FORWARD_SPEED, -SHARP_TURN_REVERSE_SPEED);
+  if (currentMode == MODE_SLOW) {
+    setMotor(SLOW_SHARP_TURN_FORWARD_SPEED, -SLOW_SHARP_TURN_REVERSE_SPEED);
+  } else {
+    setMotor(NORMAL_SHARP_TURN_FORWARD_SPEED, -NORMAL_SHARP_TURN_REVERSE_SPEED);
+  }
 }
 
 static void driveCornerL() {
@@ -362,15 +362,7 @@ static void applyLineFollowDrive() {
     return;
   }
   if (lineState == LINE_STATE_MIDDLE) {
-    if (currentMode == MODE_SLOW) {
-      driveByError(err);
-    } else if (isEarlySharpLeft()) {
-      driveSharpL();
-    } else if (isEarlySharpRight()) {
-      driveSharpR();
-    } else {
-      driveByError(err);
-    }
+    driveByError(err);
     return;
   }
   if (lineState == LINE_STATE_LEFT_RIGHT || lineState == LINE_STATE_ALL) {
