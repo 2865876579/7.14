@@ -150,6 +150,8 @@ void armUpdate() {
   }
 
   bool isGrab = (armNextMode == ARM_MODE_GRAB);
+  bool isPlace = (armNextMode == ARM_MODE_PLACE);
+  bool isHold = (armNextMode == ARM_MODE_HOLD);
   unsigned long waitMs = ARM_STEP_INTERVAL_MS;
   if (isGrab && armStep == 1) waitMs = ARM_GRAB_S2_DELAY_MS;
   if (isGrab && armStep == 2) waitMs = ARM_GRAB_S3_DELAY_MS;
@@ -159,10 +161,22 @@ void armUpdate() {
 
   if (armStep == 1) {
     writeAngle(armTargetN[1], armTargetS[1]);
-    armStep = 2;
+    if (isHold) {
+      // PLACE 和 HOLD 的舵机3目标相同，跳过无实际动作的重复写入。
+      armStep = 4;
+      armDoneTime = millis();
+    } else {
+      armStep = 2;
+    }
   } else if (armStep == 2) {
     writeAngle(armTargetN[2], armTargetS[2]);
-    armStep = 3;
+    if (isPlace) {
+      // 放置到位后直接进入完成保持，去掉纯状态切换的额外等待。
+      armStep = 4;
+      armDoneTime = millis();
+    } else {
+      armStep = 3;
+    }
   } else if (armStep == 3) {
     armStep = 4;
     armDoneTime = millis();

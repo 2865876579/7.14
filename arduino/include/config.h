@@ -100,8 +100,8 @@ const int GRAB_WIGGLE_INNER_SPEED = 170; // 摆头内侧速度（实际反转）
 const int GRAB_WIGGLE_OUTER_SPEED = 170; // 摆头外侧速度
 const int CORNER_TURN_FORWARD_SPEED  = 240; // 直角弯外2速度
 const int CORNER_TURN_REVERSE_SPEED  = 240;// 直角弯内侧反转速度
-const int FINAL_BACKWARD_LEFT_SPEED  = 105; // 终点后退左轮速度
-const int FINAL_BACKWARD_RIGHT_SPEED = 125; // 终点后退右轮速度
+const int FINAL_BACKWARD_LEFT_SPEED  = 100; // 终点后退左轮速度
+const int FINAL_BACKWARD_RIGHT_SPEED = 130; // 终点后退右轮速度
 
 const int TURN_OUTER_SPEED = SHARP_TURN_FORWARD_SPEED;
 const int TURN_INNER_SPEED = -SHARP_TURN_REVERSE_SPEED;
@@ -123,7 +123,7 @@ const int SERVO3_PIN = 7;
 // 识别模式
 const int ARM_DETECT_S1 = 20;
 const int ARM_DETECT_S2 = 35;
-const int ARM_DETECT_S3 = 235;//235
+const int ARM_DETECT_S3 = 250;//235
 // 抓取模式
 const int ARM_GRAB_S1 = 20;
 const int ARM_GRAB_S2 = 145; // 上下范围：5~145
@@ -131,7 +131,7 @@ const int ARM_GRAB_S3 = 175;
 // 放置模式
 const int ARM_PLACE_S1 = 130;
 const int ARM_PLACE_S2 = 100;
-const int ARM_PLACE_S3 = 235;
+const int ARM_PLACE_S3 = 250;
 // 栅格模式
 const int ARM_GRID_S1 = 20;
 const int ARM_GRID_S2 = 145;
@@ -142,7 +142,7 @@ const int ARM_HOLD_S3 = 235;
 
 // ===== 机械臂动作时序 =====
 const unsigned long ARM_STEP_INTERVAL_MS  = 500; // 每步动作间隔（ms）
-const unsigned long ARM_GRAB_S2_DELAY_MS  = 5000; // 抓取模式 servo2 动作前等待（ms）
+const unsigned long ARM_GRAB_S2_DELAY_MS  = 3500; // 抓取模式 servo2 动作前等待（ms）
 const unsigned long ARM_GRAB_S3_DELAY_MS  = 1000; // 抓取模式 servo3 动作前等待（ms）
 const unsigned long ARM_DONE_HOLD_MS      = 500; // 动作完成后额外等待（ms）
 
