@@ -55,6 +55,8 @@ static unsigned long serialBlockUntilMs = 0;
 // 慢速模式丢线计时：用于区分”终点全黑倒车”与”普通直角弯”
 static unsigned long slowLineLostStartTime = 0;
 static bool slowLongLossPending = false;
+static bool slowRightRecoveryActive = false;
+static unsigned long slowRightRecoveryStartTime = 0;
 
 static void enterFollowMode(bool slowMode);
 static void runFollowLikeMode();
@@ -238,6 +240,12 @@ static void driveSlowLostL() {
   setMotor(-SLOW_LOST_LEFT_INNER_SPEED, SLOW_LOST_LEFT_OUTER_SPEED);
 }
 
+static void driveSlowRightRecovery() {
+  currentAction = ACTION_TURN_RIGHT;
+  lastTurnAction = ACTION_TURN_RIGHT;
+  setMotor(SLOW_RIGHT_RECOVERY_FORWARD_SPEED, -SLOW_RIGHT_RECOVERY_REVERSE_SPEED);
+}
+
 static void driveSlowLostR() {
   currentAction = ACTION_SEARCH_LEFT;
   lastTurnAction = ACTION_TURN_LEFT;
@@ -296,12 +304,6 @@ static void driveCornerL() {
   setMotor(-CORNER_TURN_REVERSE_SPEED, CORNER_TURN_FORWARD_SPEED);
 }
 
-static void driveCornerR() {
-  currentAction = ACTION_TURN_RIGHT;
-  lastTurnAction = ACTION_TURN_RIGHT;
-  setMotor(CORNER_TURN_FORWARD_SPEED, -CORNER_TURN_REVERSE_SPEED);
-}
-
 static void driveBackward() {
   currentAction = ACTION_BACKWARD;
   setMotor(-FINAL_BACKWARD_LEFT_SPEED, -FINAL_BACKWARD_RIGHT_SPEED);
@@ -333,6 +335,39 @@ static void driveByError(float err) {
 static void applyLineFollowDrive() {
   float err = calculateLineError();
 
+  if (currentMode != MODE_SLOW) {
+    slowRightRecoveryActive = false;
+    slowRightRecoveryStartTime = 0;
+  } else if (slowRightRecoveryActive) {
+    if (middleBlack == 1) {
+      slowRightRecoveryActive = false;
+      slowRightRecoveryStartTime = 0;
+      if (lineState == LINE_STATE_MIDDLE_RIGHT) {
+        driveSoftR();
+        return;
+      }
+      if (lineState == LINE_STATE_MIDDLE) {
+        driveStraight();
+        return;
+      }
+      // 左中或全黑交回原流程处理。
+    } else if (lineState == LINE_STATE_RIGHT || lineState == LINE_STATE_NONE) {
+      if (millis() - slowRightRecoveryStartTime < SLOW_RIGHT_RECOVERY_TIMEOUT_MS) {
+        driveSlowRightRecovery();
+        return;
+      }
+      slowRightRecoveryActive = false;
+      slowRightRecoveryStartTime = 0;
+      if (lineState == LINE_STATE_NONE) {
+        driveSlowLostL();
+        return;
+      }
+    } else {
+      slowRightRecoveryActive = false;
+      slowRightRecoveryStartTime = 0;
+    }
+  }
+
   if (lineState == LINE_STATE_NONE) {
     if (currentMode == MODE_SLOW) {
       driveSlowLostL();
@@ -350,7 +385,7 @@ static void applyLineFollowDrive() {
     return;
   }
   if (lineState == LINE_STATE_MIDDLE_RIGHT) {
-    currentMode == MODE_SLOW ? driveCornerR() : driveByError(err);
+    currentMode == MODE_SLOW ? driveSoftR() : driveByError(err);
     return;
   }
   if (lineState == LINE_STATE_LEFT) {
@@ -358,7 +393,13 @@ static void applyLineFollowDrive() {
     return;
   }
   if (lineState == LINE_STATE_RIGHT) {
-    currentMode == MODE_SLOW ? driveCornerR() : driveSharpR();
+    if (currentMode == MODE_SLOW) {
+      slowRightRecoveryActive = true;
+      slowRightRecoveryStartTime = millis();
+      driveSlowRightRecovery();
+    } else {
+      driveSharpR();
+    }
     return;
   }
   if (lineState == LINE_STATE_MIDDLE) {
@@ -416,6 +457,8 @@ static void resetCycleState() {
   grabWiggleFirstLeg = true;
   slowLineLostStartTime = 0;
   slowLongLossPending = false;
+  slowRightRecoveryActive = false;
+  slowRightRecoveryStartTime = 0;
   clearDetectedShape();
   serialBlockUntilMs = millis() + 1500;
   cycleStartTime = millis();
@@ -540,6 +583,11 @@ static void updateSlowLineLossTracking() {
     return;
   }
 
+  if (slowRightRecoveryActive && lineState == LINE_STATE_NONE) {
+    slowLineLostStartTime = 0;
+    return;
+  }
+
   if (lineState == LINE_STATE_NONE) {
     if (slowLineLostStartTime == 0) {
       slowLineLostStartTime = millis();
@@ -564,7 +612,8 @@ static void runFollowLikeMode() {
     return;
   }
 
-  if (slowMode && !finalLeftSearchCompleted && lineState == LINE_STATE_NONE) {
+  if (slowMode && !finalLeftSearchCompleted &&
+      lineState == LINE_STATE_NONE && !slowRightRecoveryActive) {
     currentMode = MODE_FINAL_LEFT_SEARCH;
     driveSlowLostL();
     return;

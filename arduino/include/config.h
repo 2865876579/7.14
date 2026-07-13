@@ -32,9 +32,9 @@ const unsigned long ULTRASONIC_SERIAL_PRINT_INTERVAL_MS = 200;
 
 // ===== 栅格模式 =====
 const bool GRID_MODE_ENABLED = true;
-const int GRID_LEFT_SPEED  = 240;               // 栅格冲刺左轮速度（0~255）
-const int GRID_RIGHT_SPEED = 250;                 // 栅格冲刺右轮速度（0~255）
-const unsigned long GRID_MODE_TIME_MS     = 3600;  // 栅格冲刺持续时间（ms）
+const int GRID_LEFT_SPEED  = 215;               // 栅格冲刺左轮速度（0~255）
+const int GRID_RIGHT_SPEED = 220;                 // 栅格冲刺右轮速度（0~255）
+const unsigned long GRID_MODE_TIME_MS     = 3400;  // 栅格冲刺持续时间（ms）
 const unsigned long GRID_REENTER_BLOCK_MS = 5000;   // 退出栅格后多久才能再次进入（ms）
 
 // ===== 灰度传感器阈值（低于阈值判为黑线） =====
@@ -71,20 +71,23 @@ const int NORMAL_SHARP_TURN_FORWARD_SPEED  = 168;
 const int NORMAL_SHARP_TURN_REVERSE_SPEED  = 128;
 
 // ===== 慢速循迹速度（最终 PWM） =====
-const int SLOW_FORWARD_SPEED             = 95;
-const int SLOW_SOFT_TURN_INNER_SPEED     = 66;
-const int SLOW_SOFT_TURN_OUTER_SPEED     = 88;
-const int SLOW_MIDDLE_TURN_INNER_SPEED   = 56;
-const int SLOW_MIDDLE_TURN_OUTER_SPEED   = 98;
-const int SLOW_SHARP_TURN_FORWARD_SPEED  = 189;
-const int SLOW_SHARP_TURN_REVERSE_SPEED  = 144;
+const int SLOW_FORWARD_SPEED           = 105;
+const int SLOW_SOFT_TURN_INNER_SPEED   = 73;
+const int SLOW_SOFT_TURN_OUTER_SPEED   = 98;
+const int SLOW_MIDDLE_TURN_INNER_SPEED = 62;
+const int SLOW_MIDDLE_TURN_OUTER_SPEED = 109;
+const int SLOW_SHARP_TURN_FORWARD_SPEED  = 210;
+const int SLOW_SHARP_TURN_REVERSE_SPEED  = 160;
+const int SLOW_RIGHT_RECOVERY_FORWARD_SPEED = 180;
+const int SLOW_RIGHT_RECOVERY_REVERSE_SPEED = 160;
+const unsigned long SLOW_RIGHT_RECOVERY_TIMEOUT_MS = 300;
 
 // ===== 固定动作速度（最终 PWM） =====
 const int SHARP_TURN_FORWARD_SPEED = 210; // 急转外侧速度
 const int SHARP_TURN_REVERSE_SPEED = 160; // 急转内侧反转速度
 const int LOST_TURN_FORWARD_SPEED  = 168; // 普通丢线修正外侧速度
 const int LOST_TURN_REVERSE_SPEED  = 112; // 普通丢线修正内侧反转速度
-const int SLOW_LOST_LEFT_INNER_SPEED = 20;  // 慢速丢线左找线内侧速度
+const int SLOW_LOST_LEFT_INNER_SPEED = 15;  // 慢速丢线左找线内侧速度
 const int SLOW_LOST_LEFT_OUTER_SPEED = 195; // 慢速丢线左找线外侧速度
 const int GRID_EXIT_LOST_INNER_SPEED = 190;  // 栅格退出后找线内侧速度
 const int GRID_EXIT_LOST_OUTER_SPEED =100; // 栅格退出后找线外侧速度
@@ -95,8 +98,8 @@ const unsigned long GRAB_WIGGLE_HALF_CYCLE_MS = 800;//头固定单次时间（ms
 const int GRAB_WIGGLE_MAX_STEPS = 5;     // 保留（固定幅度模式下不再使用）
 const int GRAB_WIGGLE_INNER_SPEED = 170; // 摆头内侧速度（实际反转）
 const int GRAB_WIGGLE_OUTER_SPEED = 170; // 摆头外侧速度
-const int CORNER_TURN_FORWARD_SPEED  = 230; // 直角弯外2速度
-const int CORNER_TURN_REVERSE_SPEED  = 220;// 直角弯内侧反转速度
+const int CORNER_TURN_FORWARD_SPEED  = 240; // 直角弯外2速度
+const int CORNER_TURN_REVERSE_SPEED  = 230;// 直角弯内侧反转速度
 const int FINAL_BACKWARD_LEFT_SPEED  = 105; // 终点后退左轮速度
 const int FINAL_BACKWARD_RIGHT_SPEED = 125; // 终点后退右轮速度
 
