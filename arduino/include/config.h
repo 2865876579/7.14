@@ -32,15 +32,15 @@ const unsigned long ULTRASONIC_SERIAL_PRINT_INTERVAL_MS = 200;
 
 // ===== 栅格模式 =====
 const bool GRID_MODE_ENABLED = true;
-const int GRID_LEFT_SPEED  = 210;               // 栅格冲刺左轮速度（0~255）
-const int GRID_RIGHT_SPEED = 215;                 // 栅格冲刺右轮速度（0~255）
+const int GRID_LEFT_SPEED  = 240;               // 栅格冲刺左轮速度（0~255）
+const int GRID_RIGHT_SPEED = 250;                 // 栅格冲刺右轮速度（0~255）
 const unsigned long GRID_MODE_TIME_MS     = 3600;  // 栅格冲刺持续时间（ms）
 const unsigned long GRID_REENTER_BLOCK_MS = 5000;   // 退出栅格后多久才能再次进入（ms）
 
 // ===== 灰度传感器阈值（低于阈值判为黑线） =====
-const int LEFT_THRESHOLD   = 123;
-const int MIDDLE_THRESHOLD = 145;
-const int RIGHT_THRESHOLD  = 123;
+const int LEFT_THRESHOLD   = 257;
+const int MIDDLE_THRESHOLD = 233;
+const int RIGHT_THRESHOLD  = 182;
 
 // ===== 基础直行速度 =====
 const int FORWARD_SPEED = 150; // forward() 直接调用时的速度

@@ -19,10 +19,10 @@ serial = uart.UART("/dev/ttyS2", 9600)
 FRAME_W = 320
 FRAME_H = 240
 
-# LAB threshold. Keep the upper L wide open so bright white targets are not clipped.
-L_MIN, L_MAX = 203, 255
-A_MIN, A_MAX = 98, 222
-B_MIN, B_MAX = 86, 166
+# LAB threshold calibrated for the current target and lighting.
+L_MIN, L_MAX = 182, 207
+A_MIN, A_MAX = 117, 169
+B_MIN, B_MAX = 108, 136
 
 # Geometry filter
 CANDIDATE_MIN_AREA = 80
